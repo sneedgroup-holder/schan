@@ -7,12 +7,55 @@
   </section>
 
   <section class="board-list">
-    <% boards.forEach(board => { %>
-      <div class="board-item">
-        <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
-        <p><%= board.description %></p>
-      </div>
-    <% }); %>
+    <h3 class="category-header">General</h3>
+    <div class="category-boards">
+      <% boards.filter(board => ['b', 'pol', 'sci', 'food'].includes(board.id)).forEach(board => { %>
+        <div class="board-item">
+          <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
+          <p><%= board.description %></p>
+        </div>
+      <% }); %>
+    </div>
+
+    <h3 class="category-header">Creative</h3>
+    <div class="category-boards">
+      <% boards.filter(board => ['art', 'music', 'p'].includes(board.id)).forEach(board => { %>
+        <div class="board-item">
+          <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
+          <p><%= board.description %></p>
+        </div>
+      <% }); %>
+    </div>
+
+    <h3 class="category-header">Technology</h3>
+    <div class="category-boards">
+      <% boards.filter(board => ['g', 'foss', 'appl'].includes(board.id)).forEach(board => { %>
+        <div class="board-item">
+          <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
+          <p><%= board.description %></p>
+        </div>
+      <% }); %>
+    </div>
+
+    <h3 class="category-header">Interests</h3>
+    <div class="category-boards">
+      <% boards.filter(board => ['a', 'sanrio', 'vocal', 'game'].includes(board.id)).forEach(board => { %>
+        <div class="board-item">
+          <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
+          <p><%= board.description %></p>
+        </div>
+      <% }); %>
+    </div>
+
+    <h3 class="category-header">Most likely to contain NSFW content</h3>
+    <div class="category-boards">
+      <% boards.filter(board => ['hen', 'r34', 'coom', 'wtf'].includes(board.id)).forEach(board => { %>
+        <div class="board-item">
+          <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
+          <p><%= board.description %></p>
+        </div>
+      <% }); %>
+    </div>
   </section>
 
   <section class="site-info">
@@ -21,10 +64,9 @@
     <p>Board rules:</p>
     <ul>
       <li>Be respectful to others</li>
-      <li>No illegal content</li>
       <li>No spamming</li>
       <li>We don't moderate content, so please be careful.</li>
-      <li>All boards are NSFW, the ones with *NSFW* in the name are the ones with porn.</li>
+      <li>All boards are NSFW, the ones with *NSFW* in the name are the ones that most likely have the most porn or other NSFW content.</li>
       <li>Be aged 18 or older.</li>
       <li>Have fun!</li>
     </ul>

@@ -15,6 +15,27 @@ const moment = require('moment');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const defaultBoards = [
+  { id: 'b', name: 'Random', description: 'Random discussion' },
+  { id: 'a', name: 'Anime', description: 'Anime & Manga discussion' },
+  { id: 'sanrio', name: 'Sanrio', description: 'Discussion about Sanrio characters, cartoons, products, and their universes' },
+  { id: 'vocal', name: 'Vocaloid-like', description: "Discussion about Vocal and Singing software, characters, songs, products, and their universes" },
+  { id: 'pol', name: 'Politics', description: 'Political discussion' },
+  { id: 'g', name: 'Technology', description: 'Technology discussion' },
+  { id: 'p', name: 'Photography', description: 'Photography discussion' },
+  { id: 'hen', name: '*NSFW* Hentai', description: '*NSFW* First-party porn of Anime and Manga characters' },
+  { id: 'r34', name: '*NSFW* r34', description: "*NSFW* If it exists, there's porn of it. Third-party porn of cartoons, anime, and manga." },
+  { id: 'coom', name: '*NSFW* Coomer Zone', description: '*NSFW* Porn of anything and everything, including real people.' },
+  { id: 'wtf', name: '*NSFW* WTF', description: '*NSFW* Shit that makes you mad, sad, or just makes you go "wtf"' },
+  { id: 'foss', name: 'Open Source', description: 'Talk about open source projects and software' },
+  { id: 'sci', name: 'Science', description: 'Science discussion' },
+  { id: 'art', name: 'Art', description: 'Art discussion' },
+  { id: 'music', name: 'Music', description: 'Music discussion' },
+  { id: 'food', name: 'Food', description: 'Food discussion' },
+  { id: 'game', name: 'Video Games', description: 'Video Game discussion' },
+  { id: 'appl', name: 'Apple', description: 'Talk about the joys of Apple products, services, and the company.' }
+];
+
 // Initialize quick.db
 const db = new QuickDB();
 
@@ -64,36 +85,32 @@ if (!fs.existsSync('./public/uploads')) {
 
 // Initialize default boards if they don't exist
 async function initializeBoards() {
-  const boards = await db.get('boards');
+  let boards = await db.get('boards') || [];
+
   
-  if (!boards) {
-    const defaultBoards = [
-      { id: 'b', name: 'Random', description: 'Random discussion' },
-      { id: 'sanrio', name: 'Sanrio', description: 'Discussion about Sanrio characters, cartoons, products, and their universes' },
-      { id: 'vocaloid', name: 'Vocaloid', description: 'Discussion about Vocaloid characters, songs, products, and their universes' },
-      { id: 'pol', name: 'Politics', description: 'Political discussion' },
-      { id: 'g', name: 'Technology', description: 'Technology discussion' },
-      { id: 'p', name: 'Photography', description: 'Photography discussion' },
-      { id: 'hen', name: '*NSFW* Hentai', description: '*NSFW* First-party porn of Anime and Manga characters' },
-      { id: 'r34', name: '*NSFW* r34', description: "*NSFW* If it exists, there's porn of it. Third-party porn of cartoons, anime, and manga." },
-      { id: 'coom', name: '*NSFW* Coomer Zone', description: '*NSFW*Porn of anything and everything, including real people.' },
-      { id: 'wtf', name: '*NSFW* WTF', description: '*NSFW* Shit that makes you mad, sad, or makes you go "wtf"' },
-      { id: 'foss', name: 'Open Source', description: 'Talk about open source projects and software' },
-      { id: 'sci', name: 'Science', description: 'Science discussion' },
-      { id: 'art', name: 'Art', description: 'Art discussion' },
-      { id: 'music', name: 'Music', description: 'Music discussion' },
-      { id: 'food', name: 'Food', description: 'Food discussion' },
-      { id: 'game', name: 'Video Games', description: 'Video Game discussion' },
-      { id: 'appl', name: 'Apple', description: 'Talk about the joys of Apple products, services, and the company.' }
-    ];
-    
-    await db.set('boards', defaultBoards);
-    
-    // Create tables for each board's threads and posts
-    for (const board of defaultBoards) {
+  // Add new boards that don't exist yet
+  for (const defaultBoard of defaultBoards) {
+    if (!boards.some(board => board.id === defaultBoard.id)) {
+      boards.push(defaultBoard);
+      await db.set(`threads_${defaultBoard.id}`, []);
+    }
+  }
+  
+  await db.set('boards', boards);
+  return boards;
+}
+
+// Update all boards in the database
+async function updateBoards() {
+  // Create tables for each board's threads and posts if they don't exist
+  for (const board of defaultBoards) {
+    if (!(await db.has(`threads_${board.id}`))) {
       await db.set(`threads_${board.id}`, []);
     }
   }
+  
+  await db.set('boards', defaultBoards);
+  return defaultBoards;
 }
 
 // Utility function to generate post IDs
@@ -255,6 +272,17 @@ app.post('/board/:boardId/thread/:threadId/reply', upload.single('image'), async
   
   req.session.flashMessage = { type: 'success', message: 'Reply posted successfully' };
   res.redirect(`/board/${boardId}/thread/${threadId}`);
+});
+
+// Admin routes
+app.get('/admin/update-boards', async (req, res) => {
+  try {
+    const boards = await updateBoards();
+    res.json({ success: true, message: 'Boards updated successfully', boards });
+  } catch (error) {
+    console.error('Error updating boards:', error);
+    res.status(500).json({ success: false, message: 'Error updating boards', error: error.message });
+  }
 });
 
 // Start the server
