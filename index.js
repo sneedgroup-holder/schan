@@ -30,7 +30,9 @@ const defaultBoards = [
   { id: 'foss', name: 'Open Source', description: 'Talk about open source projects and software' },
   { id: 'sci', name: 'Science', description: 'Science discussion' },
   { id: 'art', name: 'Art', description: 'Art discussion' },
-  { id: 'music', name: 'Music', description: 'Music discussion' },
+  { id: 'moozie', name: 'Music', description: 'Music discussion' },
+  { id: 'srcleak', name: 'Source Code Leaks', description: 'Leaks of source code, programming documentation, and other technical documents' },
+  { id: 'leak', name: 'Random Leaks', description: 'Leaks of anything and everything, including but not limited to source code.' },
   { id: 'food', name: 'Food', description: 'Food discussion' },
   { id: 'game', name: 'Video Games', description: 'Video Game discussion' },
   { id: 'appl', name: 'Apple', description: 'Talk about the joys of Apple products, services, and the company.' }

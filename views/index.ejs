@@ -19,7 +19,7 @@
 
     <h3 class="category-header">Creative</h3>
     <div class="category-boards">
-      <% boards.filter(board => ['art', 'music', 'p'].includes(board.id)).forEach(board => { %>
+      <% boards.filter(board => ['art', 'moozie', 'p'].includes(board.id)).forEach(board => { %>
         <div class="board-item">
           <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
           <p><%= board.description %></p>
@@ -29,7 +29,7 @@
 
     <h3 class="category-header">Technology</h3>
     <div class="category-boards">
-      <% boards.filter(board => ['g', 'foss', 'appl'].includes(board.id)).forEach(board => { %>
+      <% boards.filter(board => ['g', 'foss', 'appl', 'srcleak'].includes(board.id)).forEach(board => { %>
         <div class="board-item">
           <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
           <p><%= board.description %></p>
@@ -39,7 +39,7 @@
 
     <h3 class="category-header">Interests</h3>
     <div class="category-boards">
-      <% boards.filter(board => ['a', 'sanrio', 'vocal', 'game'].includes(board.id)).forEach(board => { %>
+      <% boards.filter(board => ['a', 'sanrio', 'vocal', 'game', 'leak'].includes(board.id)).forEach(board => { %>
         <div class="board-item">
           <h3><a href="/board/<%= board.id %>">/<%= board.id %>/ - <%= board.name %></a></h3>
           <p><%= board.description %></p>
