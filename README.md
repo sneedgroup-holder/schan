@@ -53,12 +53,13 @@ npm run dev
 - `/views` - EJS templates
 - `/index.js` - Main application file
 
-## Default Boards
+## Some Default Boards
 
 - /b/ - Random
 - /a/ - Anime & Manga
 - /g/ - Technology
 - /p/ - Photography
+- More...
 
 ## License
 
