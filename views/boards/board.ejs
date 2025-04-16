@@ -1,0 +1,97 @@
+<%- include('../partials/header') %>
+
+<main>
+  <div class="board-header">
+    <h2>/<%= board.id %>/ - <%= board.name %></h2>
+    <p><%= board.description %></p>
+  </div>
+
+  <div class="post-form">
+    <h3>Create a new thread</h3>
+    <form action="/board/<%= board.id %>/thread" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="Optional">
+      </div>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Anonymous">
+      </div>
+      <div class="form-group">
+        <label for="content">Comment</label>
+        <textarea id="content" name="content" placeholder="Type your comment here"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="image">Image</label>
+        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif">
+        <div class="file-preview"></div>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Post">
+      </div>
+    </form>
+  </div>
+
+  <div class="thread-nav">
+    <a href="/">Home</a> / <a href="/board/<%= board.id %>">/<%= board.id %>/</a>
+  </div>
+
+  <div class="threads">
+    <% if (threads.length === 0) { %>
+      <p>No threads yet. Be the first to post!</p>
+    <% } else { %>
+      <% threads.forEach(thread => { %>
+        <div class="thread">
+          <% const op = thread.posts[0]; %>
+          <div class="post op" id="p<%= op.id %>">
+            <div class="post-header">
+              <span class="post-name"><%= op.name %></span>
+              <span class="post-time"><%= moment(op.timestamp).format('MM/DD/YY(ddd)HH:mm:ss') %></span>
+              <a href="/board/<%= board.id %>/thread/<%= thread.id %>" class="post-number">No.<%= op.id %></a>
+            </div>
+            <% if (thread.subject) { %>
+              <div class="post-subject"><%= thread.subject %></div>
+            <% } %>
+            <% if (op.image) { %>
+              <img src="<%= op.image %>" alt="Post image" class="post-image">
+            <% } %>
+            <div class="post-content"><%= op.content %></div>
+            <div class="post-info">
+              <a href="/board/<%= board.id %>/thread/<%= thread.id %>">
+                <%= thread.postCount - 1 %> <%= thread.postCount - 1 === 1 ? 'reply' : 'replies' %>
+              </a>
+            </div>
+          </div>
+          
+          <% 
+            // Show up to 3 replies, starting from the most recent ones
+            const lastPosts = thread.posts.slice(1).slice(-3); 
+          %>
+          <% lastPosts.forEach(post => { %>
+            <div class="post" id="p<%= post.id %>">
+              <div class="post-header">
+                <span class="post-name"><%= post.name %></span>
+                <span class="post-time"><%= moment(post.timestamp).format('MM/DD/YY(ddd)HH:mm:ss') %></span>
+                <a href="/board/<%= board.id %>/thread/<%= thread.id %>#p<%= post.id %>" class="post-number">No.<%= post.id %></a>
+              </div>
+              <% if (post.image) { %>
+                <img src="<%= post.image %>" alt="Post image" class="post-image">
+              <% } %>
+              <div class="post-content"><%= post.content %></div>
+            </div>
+          <% }); %>
+          
+          <% if (thread.posts.length > 4) { %>
+            <div class="thread-expand">
+              <a href="/board/<%= board.id %>/thread/<%= thread.id %>">
+                View all <%= thread.posts.length - 1 %> replies
+              </a>
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %> 
