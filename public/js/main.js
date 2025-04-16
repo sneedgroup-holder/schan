@@ -24,4 +24,62 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+  
+  // Post content preview with greentext support
+  const contentTextareas = document.querySelectorAll('textarea[name="content"]');
+  contentTextareas.forEach(textarea => {
+    const previewDiv = textarea.parentElement.querySelector('.post-preview');
+    
+    // Create preview div if it doesn't exist
+    if (!previewDiv) {
+      const newPreview = document.createElement('div');
+      newPreview.className = 'post-preview';
+      newPreview.style.marginTop = '10px';
+      newPreview.style.padding = '10px';
+      newPreview.style.border = '1px solid #ddd';
+      newPreview.style.borderRadius = '4px';
+      newPreview.style.backgroundColor = '#f8f8f8';
+      newPreview.style.whiteSpace = 'pre-wrap';
+      newPreview.style.wordWrap = 'break-word';
+      newPreview.style.display = 'none';
+      newPreview.innerHTML = '<div class="preview-header">Preview:</div>';
+      textarea.parentElement.appendChild(newPreview);
+    }
+    
+    // Format content with greentext
+    function formatContent(content) {
+      if (!content) return '';
+      
+      // Process each line and wrap greentext with span tags
+      return content
+        .split('\n')
+        .map(line => {
+          if (line.trim().startsWith('>')) {
+            return `<span class="greentext">${line}</span>`;
+          }
+          return line;
+        })
+        .join('\n');
+    }
+    
+    // Update preview on input
+    textarea.addEventListener('input', function() {
+      const previewEl = this.parentElement.querySelector('.post-preview');
+      const content = this.value.trim();
+      
+      if (content) {
+        previewEl.style.display = 'block';
+        const previewContent = previewEl.querySelector('.preview-content') || document.createElement('div');
+        previewContent.className = 'preview-content';
+        previewContent.innerHTML = formatContent(content);
+        
+        // Add to preview container if not already there
+        if (!previewEl.querySelector('.preview-content')) {
+          previewEl.appendChild(previewContent);
+        }
+      } else {
+        previewEl.style.display = 'none';
+      }
+    });
+  });
 }); 

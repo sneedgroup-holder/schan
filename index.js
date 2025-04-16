@@ -85,6 +85,22 @@ if (!fs.existsSync('./public/uploads')) {
   fs.mkdirSync('./public/uploads', { recursive: true });
 }
 
+// Function to format post content with greentext support
+function formatPostContent(content) {
+  if (!content) return '';
+  
+  // Process each line and wrap greentext with span tags
+  return content
+    .split('\n')
+    .map(line => {
+      if (line.trim().startsWith('>')) {
+        return `<span class="greentext">${line}</span>`;
+      }
+      return line;
+    })
+    .join('\n');
+}
+
 // Initialize default boards if they don't exist
 async function initializeBoards() {
   let boards = await db.get('boards') || [];
@@ -137,7 +153,11 @@ function verifyCaptcha(req) {
 // Routes
 app.get('/', async (req, res) => {
   const boards = await db.get('boards');
-  res.render('index', { boards, flashMessage: req.session.flashMessage || null });
+  res.render('index', { 
+    boards, 
+    flashMessage: req.session.flashMessage || null,
+    formatPostContent 
+  });
   req.session.flashMessage = null;
 });
 
@@ -156,7 +176,14 @@ app.get('/board/:boardId', async (req, res) => {
   // Sort threads by last activity (most recent first)
   threads.sort((a, b) => b.lastPostTime - a.lastPostTime);
   
-  res.render('boards/board', { board, boards, threads, moment, flashMessage: req.session.flashMessage || null });
+  res.render('boards/board', { 
+    board, 
+    boards, 
+    threads, 
+    moment, 
+    flashMessage: req.session.flashMessage || null,
+    formatPostContent
+  });
   req.session.flashMessage = null;
 });
 
@@ -177,7 +204,14 @@ app.get('/board/:boardId/thread/:threadId', async (req, res) => {
     return res.status(404).send('Thread not found');
   }
   
-  res.render('boards/thread', { board, boards, thread, moment, flashMessage: req.session.flashMessage || null });
+  res.render('boards/thread', { 
+    board, 
+    boards, 
+    thread, 
+    moment, 
+    flashMessage: req.session.flashMessage || null,
+    formatPostContent
+  });
   req.session.flashMessage = null;
 });
 

@@ -193,6 +193,12 @@ nav a.more-boards:hover {
   word-wrap: break-word;
 }
 
+/* Greentext styling */
+.greentext {
+  display: block;
+  color: #789922;
+}
+
 .post-info {
   margin-top: 10px;
   font-size: 0.9em;
