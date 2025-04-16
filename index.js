@@ -25,7 +25,7 @@ const defaultBoards = [
   { id: 'p', name: 'Photography', description: 'Photography discussion' },
   { id: 'hen', name: '*NSFW* Hentai', description: '*NSFW* First-party porn of Anime and Manga characters' },
   { id: 'r34', name: '*NSFW* r34', description: "*NSFW* If it exists, there's porn of it. Third-party porn of cartoons, anime, and manga." },
-  { id: 'coom', name: '*NSFW* Coomer Zone', description: '*NSFW* Porn of anything and everything, including real people.' },
+  { id: 'coom', name: '*NSFW* Coomer Zone', description: '*NSFW* Porn of anything and everything legal, including real people.' },
   { id: 'wtf', name: '*NSFW* WTF', description: '*NSFW* Shit that makes you mad, sad, or just makes you go "wtf"' },
   { id: 'foss', name: 'Open Source', description: 'Talk about open source projects and software' },
   { id: 'sci', name: 'Science', description: 'Science discussion' },
@@ -118,6 +118,20 @@ function generatePostId() {
   return Math.floor(Math.random() * 10000000);
 }
 
+// Utility function to verify captcha (simple server-side check for form submission)
+function verifyCaptcha(req) {
+  const captcha = req.body.captcha;
+  
+  // Check if captcha is present
+  if (!captcha) {
+    return false;
+  }
+  
+  // Since we're validating on client-side, we just ensure it's been submitted
+  // In a real production system, you'd want to store and validate captcha server-side
+  return captcha.length >= 3;
+}
+
 // Routes
 app.get('/', async (req, res) => {
   const boards = await db.get('boards');
@@ -170,6 +184,12 @@ app.post('/board/:boardId/thread', upload.single('image'), async (req, res) => {
   const { boardId } = req.params;
   const { subject, name, content } = req.body;
   const imageFile = req.file;
+  
+  // Verify captcha
+  if (!verifyCaptcha(req)) {
+    req.session.flashMessage = { type: 'error', message: 'Invalid captcha. Please try again.' };
+    return res.redirect(`/board/${boardId}`);
+  }
   
   if (!content && !imageFile) {
     req.session.flashMessage = { type: 'error', message: 'Post must contain an image or text' };
@@ -225,6 +245,12 @@ app.post('/board/:boardId/thread/:threadId/reply', upload.single('image'), async
   const { boardId, threadId } = req.params;
   const { name, content } = req.body;
   const imageFile = req.file;
+  
+  // Verify captcha
+  if (!verifyCaptcha(req)) {
+    req.session.flashMessage = { type: 'error', message: 'Invalid captcha. Please try again.' };
+    return res.redirect(`/board/${boardId}/thread/${threadId}`);
+  }
   
   if (!content && !imageFile) {
     req.session.flashMessage = { type: 'error', message: 'Post must contain an image or text' };

@@ -45,7 +45,7 @@
 
   <div class="post-form">
     <h3>Reply to thread</h3>
-    <form action="/board/<%= board.id %>/thread/<%= thread.id %>/reply" method="POST" enctype="multipart/form-data">
+    <form action="/board/<%= board.id %>/thread/<%= thread.id %>/reply" method="POST" enctype="multipart/form-data" data-validate-captcha="true">
       <div class="form-group">
         <label for="name">Name</label>
         <input type="text" id="name" name="name" placeholder="Anonymous">
@@ -60,6 +60,19 @@
         <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif">
         <div class="file-preview"></div>
       </div>
+      
+      <!-- Captcha -->
+      <div class="form-group">
+        <label for="captcha">Verification (Enter the text shown below)</label>
+        <div class="captcha-container">
+          <div class="captcha-image"></div>
+          <div class="captcha-row">
+            <input type="text" class="captcha-input" name="captcha" id="captcha" placeholder="Enter captcha" required>
+            <button class="refresh-captcha" type="button">Refresh</button>
+          </div>
+        </div>
+      </div>
+      
       <div class="form-group">
         <input type="submit" value="Post Reply">
       </div>
