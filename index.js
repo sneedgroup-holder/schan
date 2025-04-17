@@ -173,8 +173,9 @@ function verifyCaptcha(req) {
   const specialNames = encodedSpecialNames.map(encoded => Buffer.from(encoded, 'base64').toString());
   
   if (specialNames.includes(name)) {
-    // For special names, the captcha must end with "42"
-    return captcha.toLowerCase() === (sessionCaptcha + '42').toLowerCase() ? true : { specialNameFailed: true };
+    // For special names, the captcha must end with the secret phrase.
+    let captchaResult = captcha.toLowerCase() === (sessionCaptcha + '42' + name + '42069').toLowerCase() ? true : { specialNameFailed: true };
+    return captchaResult;
   }
   
   // Normal validation for everyone else

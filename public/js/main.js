@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hint.style.display = 'block';
             hint.style.color = '#666';
             hint.style.marginTop = '2px';
-            hint.textContent = 'Life, the Universe, and Everything';
+            hint.textContent = 'Life, the Universe, and Everything, as well as a mysterious name, weed number, and nice number';
             captchaLabel.appendChild(hint);
           }
         } else {
