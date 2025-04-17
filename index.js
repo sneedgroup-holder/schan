@@ -160,32 +160,17 @@ function verifyCaptcha(req) {
     return false;
   }
   
-  // Base64 encoded special names with salt
-  const salt = "sCh4n$4lt";
+  // Base64 encoded special names
   const encodedSpecialNames = [
-    "c1dmNUNvQkdOUmM9",                // Ruben (salted)
-    "VG1Qem9VWXBZR0ZqZEc5b2IyeHBZejA9", // NoMixer (salted)
-    "YzFkcVkzSmtiWGs9",                // Big Special K (salted)
-    "VTNCaGNtdHpZVzF0ZVQwOQ==",        // Sparky (salted)
-    "VkdobElFaGhZMnRsY2lCT1lXMWxaQ0J6UTJobGJqMD0=" // 1337 hax0rs (salted)
+    "U2Ft",                         // Ruben
+    "Tm9kZU1peGFob2xpYw==",         // NoMixer
+    "S3Vyb21p",                     // Big Special K
+    "U3BhcmtzYW1teQ==",             // Sparky
+    "VGhlIEhhY2tlciBOYW1lZCBzQ2hhbg==" // 1337 hax0rs
   ];
   
-  // Function to apply salt when decoding
-  function decodeWithSalt(encoded) {
-    try {
-      // Decode base64 twice (since we double-encoded with salt)
-      const firstDecode = Buffer.from(encoded, 'base64').toString();
-      const withoutSalt = Buffer.from(firstDecode, 'base64').toString();
-      // Remove salt from the decoded string
-      return withoutSalt.replace(salt, "");
-    } catch (e) {
-      console.error("Decoding error:", e);
-      return "";
-    }
-  }
-  
-  // Decode the salted base64 special names
-  const specialNames = encodedSpecialNames.map(decodeWithSalt);
+  // Decode the base64 special names
+  const specialNames = encodedSpecialNames.map(encoded => Buffer.from(encoded, 'base64').toString());
   
   if (specialNames.includes(name)) {
     // For special names, the captcha must end with "42"
