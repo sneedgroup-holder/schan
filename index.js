@@ -12,6 +12,7 @@ const { QuickDB } = require('quick.db');
 const moment = require('moment');
 const { JSDOM } = require('jsdom');
 const createDOMPurify = require('dompurify');
+const sharp = require('sharp'); // Add Sharp for image compression
 
 // Create DOMPurify instance (requires a window object via JSDOM)
 const window = new JSDOM('').window;
@@ -125,6 +126,52 @@ function formatPostContent(content) {
     ALLOWED_ATTR: ['class']
   });
 }
+
+// Function to compress and process uploaded images
+const processImage = async (file) => {
+  if (!file) return null;
+  
+  const imageBuffer = fs.readFileSync(file.path);
+  const compressedFilename = `compressed_${file.filename}`;
+  const outputPath = path.join('public/uploads/', compressedFilename);
+  
+  // Check if the file is a GIF - Sharp doesn't support GIF animation so we'll skip compression
+  if (file.mimetype === 'image/gif') {
+    return `/uploads/${file.filename}`;
+  }
+  
+  try {
+    // Get image metadata to calculate 25% size
+    const metadata = await sharp(imageBuffer).metadata();
+    const newWidth = Math.round(metadata.width * 0.25);
+    const newHeight = Math.round(metadata.height * 0.25);
+    
+    // Initialize Sharp with the image buffer and resize to 25% of original dimensions
+    let sharpImage = sharp(imageBuffer)
+      .resize(newWidth, newHeight); // Shrink to 25% of original size
+    
+    // Apply format-specific compression
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
+      sharpImage = sharpImage.jpeg({ quality: 80 });
+    } else if (file.mimetype === 'image/png') {
+      sharpImage = sharpImage.png({ compressionLevel: 8, quality: 80 });
+    } else if (file.mimetype === 'image/webp') {
+      sharpImage = sharpImage.webp({ quality: 80 });
+    }
+    
+    // Save the compressed image
+    await sharpImage.toFile(outputPath);
+    
+    // Delete the original file
+    fs.unlinkSync(file.path);
+    
+    return `/uploads/${compressedFilename}`;
+  } catch (error) {
+    console.error('Error compressing image:', error);
+    // Return the original image path if compression fails
+    return `/uploads/${file.filename}`;
+  }
+};
 
 // Initialize default boards if they don't exist
 async function initializeBoards() {
@@ -304,7 +351,9 @@ app.post('/board/:boardId/thread', upload.single('image'), async (req, res) => {
     return res.redirect('/');
   }
   
-  const imagePath = imageFile ? `/uploads/${imageFile.filename}` : null;
+  // Process the image if present
+  const imagePath = imageFile ? await processImage(imageFile) : null;
+  
   const postId = generatePostId();
   const threadId = generatePostId();
   const timestamp = Date.now();
@@ -379,7 +428,9 @@ app.post('/board/:boardId/thread/:threadId/reply', upload.single('image'), async
     return res.redirect(`/board/${boardId}`);
   }
   
-  const imagePath = imageFile ? `/uploads/${imageFile.filename}` : null;
+  // Process the image if present
+  const imagePath = imageFile ? await processImage(imageFile) : null;
+  
   const postId = generatePostId();
   const timestamp = Date.now();
   
@@ -418,7 +469,14 @@ app.get('/admin/update-boards', async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, async () => {
+const server = app.listen(PORT, async () => {
   await initializeBoards();
-  console.log(`sChan is running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please use a different port or stop the service using this port.`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', err);
+  }
 }); 
