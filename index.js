@@ -85,6 +85,19 @@ if (!fs.existsSync('./public/uploads')) {
   fs.mkdirSync('./public/uploads', { recursive: true });
 }
 
+// Generate a captcha and store it in session
+function generateCaptcha(req) {
+  const characters = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  
+  // Store in session
+  req.session.captchaCode = result;
+  return result;
+}
+
 // Function to format post content with greentext support
 function formatPostContent(content) {
   if (!content) return '';
@@ -136,13 +149,14 @@ function generatePostId() {
   return Math.floor(Math.random() * 10000000);
 }
 
-// Utility function to verify captcha (simple server-side check for form submission)
+// Utility function to verify captcha (server-side check)
 function verifyCaptcha(req) {
   const captcha = req.body.captcha;
   const name = req.body.name;
+  const sessionCaptcha = req.session.captchaCode;
   
-  // Check if captcha is present
-  if (!captcha) {
+  // Check if captcha is present and session captcha exists
+  if (!captcha || !sessionCaptcha) {
     return false;
   }
   
@@ -150,16 +164,11 @@ function verifyCaptcha(req) {
   const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
   if (specialNames.includes(name)) {
     // For special names, the captcha must end with "42"
-    if (!captcha.endsWith('42')) {
-      // Return a falsy value but with a special error code for the route handler to know
-      // this is a special case where we show a generic 500 error
-      return { specialNameFailed: true };
-    }
+    return captcha.toLowerCase() === (sessionCaptcha + '42').toLowerCase() ? true : { specialNameFailed: true };
   }
   
-  // Since we're validating on client-side, we just ensure it's been submitted
-  // In a real production system, you'd want to store and validate captcha server-side
-  return captcha.length >= 3;
+  // Normal validation for everyone else
+  return captcha.toLowerCase() === sessionCaptcha.toLowerCase();
 }
 
 // Routes
@@ -171,6 +180,12 @@ app.get('/', async (req, res) => {
     formatPostContent 
   });
   req.session.flashMessage = null;
+});
+
+// Route to refresh captcha
+app.get('/refresh-captcha', (req, res) => {
+  const captchaCode = generateCaptcha(req);
+  res.json({ captchaCode });
 });
 
 // Board routes
@@ -188,11 +203,15 @@ app.get('/board/:boardId', async (req, res) => {
   // Sort threads by last activity (most recent first)
   threads.sort((a, b) => b.lastPostTime - a.lastPostTime);
   
+  // Generate new captcha
+  const captchaCode = generateCaptcha(req);
+  
   res.render('boards/board', { 
     board, 
     boards, 
     threads, 
     moment, 
+    captchaCode,
     flashMessage: req.session.flashMessage || null,
     formatPostContent
   });
@@ -216,11 +235,15 @@ app.get('/board/:boardId/thread/:threadId', async (req, res) => {
     return res.status(404).send('Thread not found');
   }
   
+  // Generate new captcha
+  const captchaCode = generateCaptcha(req);
+  
   res.render('boards/thread', { 
     board, 
     boards, 
     thread, 
-    moment, 
+    moment,
+    captchaCode,
     flashMessage: req.session.flashMessage || null,
     formatPostContent
   });

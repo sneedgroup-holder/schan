@@ -53,75 +53,48 @@ function initCaptcha() {
   const captchaContainers = document.querySelectorAll('.captcha-container');
   
   captchaContainers.forEach(container => {
-    const captchaCode = generateCaptchaCode();
-    const captchaImage = createCaptchaSVG(captchaCode);
-    const captchaInput = container.querySelector('.captcha-input');
-    const captchaDisplay = container.querySelector('.captcha-image');
-    const refreshButton = container.querySelector('.refresh-captcha');
+    // Get server-generated captcha code from data attribute
+    const captchaCode = container.dataset.captchaCode || '';
     
-    // Set the current captcha code as a data attribute
-    container.dataset.captchaCode = captchaCode;
-    
-    // Display the captcha image
-    captchaDisplay.innerHTML = captchaImage;
-    
-    // Add refresh button functionality
-    if (refreshButton) {
-      refreshButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        const newCode = generateCaptchaCode();
-        container.dataset.captchaCode = newCode;
-        captchaDisplay.innerHTML = createCaptchaSVG(newCode);
-      });
+    if (captchaCode) {
+      const captchaImage = createCaptchaSVG(captchaCode);
+      const captchaDisplay = container.querySelector('.captcha-image');
+      const refreshButton = container.querySelector('.refresh-captcha');
+      
+      // Display the captcha image
+      if (captchaDisplay) {
+        captchaDisplay.innerHTML = captchaImage;
+      }
+      
+      // Add refresh button functionality
+      if (refreshButton) {
+        refreshButton.addEventListener('click', async (e) => {
+          e.preventDefault();
+          
+          try {
+            // Request a new captcha from the server
+            const response = await fetch('/refresh-captcha');
+            if (response.ok) {
+              const data = await response.json();
+              
+              // Update captcha image with new code
+              if (data.captchaCode) {
+                container.dataset.captchaCode = data.captchaCode;
+                if (captchaDisplay) {
+                  captchaDisplay.innerHTML = createCaptchaSVG(data.captchaCode);
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error refreshing captcha:', error);
+          }
+        });
+      }
     }
   });
-}
-
-// Validate captcha before form submission
-function validateCaptcha(form) {
-  const container = form.querySelector('.captcha-container');
-  const captchaInput = form.querySelector('.captcha-input');
-  const nameInput = form.querySelector('input[name="name"]');
-  const expectedCode = container.dataset.captchaCode;
-  const userInput = captchaInput.value;
-  const userName = nameInput ? nameInput.value : '';
-  
-  // Check for special names that require the "42" suffix
-  const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
-  
-  // If this is a special name, we'll do special validation
-  if (specialNames.includes(userName)) {
-    // For special names, allow both normal captcha (which will fail server-side)
-    // and captcha with "42" (which will pass server-side)
-    if (userInput.toLowerCase() === expectedCode.toLowerCase() || 
-        userInput.toLowerCase() === (expectedCode + '42').toLowerCase()) {
-      return true;
-    }
-    // If neither match, show error
-    alert('Incorrect captcha code. Please try again.');
-    return false;
-  }
-  
-  // Normal validation for everyone else
-  if (userInput.toLowerCase() !== expectedCode.toLowerCase()) {
-    alert('Incorrect captcha code. Please try again.');
-    return false;
-  }
-  
-  return true;
 }
 
 // Initialize captchas when DOM content is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initCaptcha();
-  
-  // Add form validation
-  const postForms = document.querySelectorAll('form[data-validate-captcha="true"]');
-  postForms.forEach(form => {
-    form.addEventListener('submit', (e) => {
-      if (!validateCaptcha(form)) {
-        e.preventDefault();
-      }
-    });
-  });
 }); 
