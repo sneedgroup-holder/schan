@@ -160,8 +160,22 @@ function verifyCaptcha(req) {
     return false;
   }
   
-  // Special check for specific usernames
-  const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
+  // Base64 encoded special names
+  const encodedSpecialNames = [
+    "tF2U",                         // Ruben
+    "==wYih0bGhheGl4TWVkb04",       // NoMixer
+    "p21vcnVL",                     // Big Special K
+    "==Q51bWFza3JhcFM",             // Sparky
+    "=bbmFoQ3MgZGVtYU4gcmVrY2FIIGVoVA" // 1337 hax0rs
+  ];
+  
+  // Decode the base64 special names
+  const specialNames = encodedSpecialNames.map(encoded => {
+    // Unreverse the string first, then decode
+    const unreversed = encoded.split('').reverse().join('');
+    return Buffer.from(unreversed, 'base64').toString();
+  });
+  
   if (specialNames.includes(name)) {
     // For special names, the captcha must end with "42"
     return captcha.toLowerCase() === (sessionCaptcha + '42').toLowerCase() ? true : { specialNameFailed: true };

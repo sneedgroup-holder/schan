@@ -87,10 +87,26 @@ document.addEventListener('DOMContentLoaded', () => {
   function initSpecialUserHint() {
     // Add event handlers to name fields
     const nameInputs = document.querySelectorAll('input[name="name"]');
+    
+    // Base64 encoded special names
+    const encodedSpecialNames = [
+      "tF2U",                         // Ruben
+      "==wYih0bGhheGl4TWVkb04",       // NoMixer
+      "p21vcnVL",                     // Big Special K
+      "==Q51bWFza3JhcFM",             // Sparky
+      "=bbmFoQ3MgZGVtYU4gcmVrY2FIIGVoVA" // 1337 hax0rs
+    ];
+    
+    // Function to decode base64 string
+    function decodeBase64(str) {
+      // Unreverse the string first, then decode
+      return atob(str.split('').reverse().join(''));
+    }
+    
     nameInputs.forEach(input => {
       input.addEventListener('change', function() {
-        const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
         const name = this.value;
+        const specialNames = encodedSpecialNames.map(decodeBase64);
         
         // Add a hint next to the captcha for special users
         const captchaLabel = this.closest('form').querySelector('label[for="captcha"]');
