@@ -90,17 +90,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Base64 encoded special names
     const encodedSpecialNames = [
-      "tF2U",                         // Ruben
-      "==wYih0bGhheGl4TWVkb04",       // NoMixer
-      "p21vcnVL",                     // Big Special K
-      "==Q51bWFza3JhcFM",             // Sparky
-      "=bbmFoQ3MgZGVtYU4gcmVrY2FIIGVoVA" // 1337 hax0rs
+      "U2Ft",                         // Ruben
+      "Tm9kZU1peGFob2xpYw==",         // NoMixer
+      "S3Vyb21p",                     // Big Special K
+      "U3BhcmtzYW1teQ==",             // Sparky
+      "VGhlIEhhY2tlciBOYW1lZCBzQ2hhbg==" // 1337 hax0rs
     ];
     
     // Function to decode base64 string
     function decodeBase64(str) {
-      // Unreverse the string first, then decode
-      return atob(str.split('').reverse().join(''));
+      return atob(str);
     }
     
     nameInputs.forEach(input => {

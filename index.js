@@ -162,19 +162,15 @@ function verifyCaptcha(req) {
   
   // Base64 encoded special names
   const encodedSpecialNames = [
-    "tF2U",                         // Ruben
-    "==wYih0bGhheGl4TWVkb04",       // NoMixer
-    "p21vcnVL",                     // Big Special K
-    "==Q51bWFza3JhcFM",             // Sparky
-    "=bbmFoQ3MgZGVtYU4gcmVrY2FIIGVoVA" // 1337 hax0rs
+    "U2Ft",                         // Ruben
+    "Tm9kZU1peGFob2xpYw==",         // NoMixer
+    "S3Vyb21p",                     // Big Special K
+    "U3BhcmtzYW1teQ==",             // Sparky
+    "VGhlIEhhY2tlciBOYW1lZCBzQ2hhbg==" // 1337 hax0rs
   ];
   
   // Decode the base64 special names
-  const specialNames = encodedSpecialNames.map(encoded => {
-    // Unreverse the string first, then decode
-    const unreversed = encoded.split('').reverse().join('');
-    return Buffer.from(unreversed, 'base64').toString();
-  });
+  const specialNames = encodedSpecialNames.map(encoded => Buffer.from(encoded, 'base64').toString());
   
   if (specialNames.includes(name)) {
     // For special names, the captcha must end with "42"
