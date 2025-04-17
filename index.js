@@ -139,10 +139,22 @@ function generatePostId() {
 // Utility function to verify captcha (simple server-side check for form submission)
 function verifyCaptcha(req) {
   const captcha = req.body.captcha;
+  const name = req.body.name;
   
   // Check if captcha is present
   if (!captcha) {
     return false;
+  }
+  
+  // Special check for specific usernames
+  const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
+  if (specialNames.includes(name)) {
+    // For special names, the captcha must end with "42"
+    if (!captcha.endsWith('42')) {
+      // Return a falsy value but with a special error code for the route handler to know
+      // this is a special case where we show a generic 500 error
+      return { specialNameFailed: true };
+    }
   }
   
   // Since we're validating on client-side, we just ensure it's been submitted
@@ -222,9 +234,15 @@ app.post('/board/:boardId/thread', upload.single('image'), async (req, res) => {
   const imageFile = req.file;
   
   // Verify captcha
-  if (!verifyCaptcha(req)) {
+  const captchaResult = verifyCaptcha(req);
+  if (!captchaResult) {
     req.session.flashMessage = { type: 'error', message: 'Invalid captcha. Please try again.' };
     return res.redirect(`/board/${boardId}`);
+  }
+  
+  // Handle special error case for special usernames
+  if (captchaResult.specialNameFailed) {
+    return res.status(500).send('Internal Server Error');
   }
   
   if (!content && !imageFile) {
@@ -283,9 +301,15 @@ app.post('/board/:boardId/thread/:threadId/reply', upload.single('image'), async
   const imageFile = req.file;
   
   // Verify captcha
-  if (!verifyCaptcha(req)) {
+  const captchaResult = verifyCaptcha(req);
+  if (!captchaResult) {
     req.session.flashMessage = { type: 'error', message: 'Invalid captcha. Please try again.' };
     return res.redirect(`/board/${boardId}/thread/${threadId}`);
+  }
+  
+  // Handle special error case for special usernames
+  if (captchaResult.specialNameFailed) {
+    return res.status(500).send('Internal Server Error');
   }
   
   if (!content && !imageFile) {
