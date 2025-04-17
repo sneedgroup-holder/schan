@@ -10,6 +10,12 @@ const path = require('path');
 const fs = require('fs');
 const { QuickDB } = require('quick.db');
 const moment = require('moment');
+const { JSDOM } = require('jsdom');
+const createDOMPurify = require('dompurify');
+
+// Create DOMPurify instance (requires a window object via JSDOM)
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
 
 // Initialize express app
 const app = express();
@@ -103,15 +109,21 @@ function formatPostContent(content) {
   if (!content) return '';
   
   // Process each line and wrap greentext with span tags
-  return content
+  const formattedContent = content
     .split('\n')
     .map(line => {
       if (line.trim().startsWith('>')) {
-        return `<span class="greentext">${line}</span>`;
+        return `<span class="greentext">${DOMPurify.sanitize(line)}</span>`;
       }
-      return line;
+      return DOMPurify.sanitize(line);
     })
     .join('\n');
+  
+  // Final sanitization of the whole content
+  return DOMPurify.sanitize(formattedContent, {
+    ALLOWED_TAGS: ['span', 'br'],
+    ALLOWED_ATTR: ['class']
+  });
 }
 
 // Initialize default boards if they don't exist
