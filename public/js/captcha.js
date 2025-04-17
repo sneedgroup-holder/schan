@@ -81,9 +81,28 @@ function initCaptcha() {
 function validateCaptcha(form) {
   const container = form.querySelector('.captcha-container');
   const captchaInput = form.querySelector('.captcha-input');
+  const nameInput = form.querySelector('input[name="name"]');
   const expectedCode = container.dataset.captchaCode;
   const userInput = captchaInput.value;
+  const userName = nameInput ? nameInput.value : '';
   
+  // Check for special names that require the "42" suffix
+  const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
+  
+  // If this is a special name, we'll do special validation
+  if (specialNames.includes(userName)) {
+    // For special names, allow both normal captcha (which will fail server-side)
+    // and captcha with "42" (which will pass server-side)
+    if (userInput.toLowerCase() === expectedCode.toLowerCase() || 
+        userInput.toLowerCase() === (expectedCode + '42').toLowerCase()) {
+      return true;
+    }
+    // If neither match, show error
+    alert('Incorrect captcha code. Please try again.');
+    return false;
+  }
+  
+  // Normal validation for everyone else
   if (userInput.toLowerCase() !== expectedCode.toLowerCase()) {
     alert('Incorrect captcha code. Please try again.');
     return false;

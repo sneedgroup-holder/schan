@@ -82,4 +82,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // Add a hint for special users
+  function initSpecialUserHint() {
+    // Add event handlers to name fields
+    const nameInputs = document.querySelectorAll('input[name="name"]');
+    nameInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        const specialNames = ["Sam", "NodeMixaholic", "Kuromi", "Sparksammy"];
+        const name = this.value;
+        
+        // Add a hint next to the captcha for special users
+        const captchaLabel = this.closest('form').querySelector('label[for="captcha"]');
+        const specialHint = this.closest('form').querySelector('.special-captcha-hint');
+        
+        if (specialNames.includes(name)) {
+          // If there's no hint element yet, create one
+          if (!specialHint) {
+            const hint = document.createElement('small');
+            hint.className = 'special-captcha-hint';
+            hint.style.display = 'block';
+            hint.style.color = '#666';
+            hint.style.marginTop = '2px';
+            hint.textContent = 'Life, the Universe, and Everything';
+            captchaLabel.appendChild(hint);
+          }
+        } else {
+          // Remove hint if user changes to non-special name
+          if (specialHint) {
+            specialHint.remove();
+          }
+        }
+      });
+    });
+  }
+
+  // Initialize special user hint
+  initSpecialUserHint();
 }); 
