@@ -60,9 +60,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 25 * 1024 * 1024 }, // 2 5MB limit
   fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/;
+    const filetypes = /jpeg|jpg|png|gif|webp|mp4|webm/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = filetypes.test(file.mimetype);
     
@@ -143,20 +143,20 @@ const processImage = async (file) => {
   try {
     // Get image metadata to calculate 25% size
     const metadata = await sharp(imageBuffer).metadata();
-    const newWidth = Math.round(metadata.width * 0.25);
-    const newHeight = Math.round(metadata.height * 0.25);
+    const newWidth = Math.round(metadata.width * 0.42);
+    const newHeight = Math.round(metadata.height * 0.42);
     
-    // Initialize Sharp with the image buffer and resize to 25% of original dimensions
+    // Initialize Sharp with the image buffer and resize to 42% of original dimensions
     let sharpImage = sharp(imageBuffer)
-      .resize(newWidth, newHeight); // Shrink to 25% of original size
+      .resize(newWidth, newHeight); // Shrink to 42% of original size
     
     // Apply format-specific compression
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg') {
-      sharpImage = sharpImage.jpeg({ quality: 80 });
+      sharpImage = sharpImage.jpeg({ quality: 69 });
     } else if (file.mimetype === 'image/png') {
-      sharpImage = sharpImage.png({ compressionLevel: 8, quality: 80 });
+      sharpImage = sharpImage.png({ compressionLevel: 8, quality: 74 });
     } else if (file.mimetype === 'image/webp') {
-      sharpImage = sharpImage.webp({ quality: 80 });
+      sharpImage = sharpImage.webp({ quality: 77 });
     }
     
     // Save the compressed image
@@ -352,7 +352,7 @@ app.post('/board/:boardId/thread', upload.single('image'), async (req, res) => {
   }
   
   // Process the image if present
-  const imagePath = imageFile ? await processImage(imageFile) : null;
+  const imagePath = imageFile ? await processImage(imageFile) : null || imageFile;
   
   const postId = generatePostId();
   const threadId = generatePostId();
