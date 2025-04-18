@@ -23,8 +23,8 @@
         <div class="post-preview"></div>
       </div>
       <div class="form-group">
-        <label for="image">Image</label>
-        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif">
+        <label for="image">Image/Video</label>
+        <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,video/mp4,video/webm">
         <div class="file-preview"></div>
       </div>
       
@@ -68,6 +68,7 @@
             <% } %>
             <% if (op.image) { %>
               <img src="<%= op.image %>" alt="Post image" class="post-image">
+              <video src="<%= op.image %>" alt="Post video" class="post-image"></video>
             <% } %>
             <div class="post-content"><%- formatPostContent(op.content) %></div>
             <div class="post-info">
@@ -90,6 +91,7 @@
               </div>
               <% if (post.image) { %>
                 <img src="<%= post.image %>" alt="Post image" class="post-image">
+                <video src="<%= post.image %>" alt="Post video" class="post-image"></video>
               <% } %>
               <div class="post-content"><%- formatPostContent(post.content) %></div>
             </div>
